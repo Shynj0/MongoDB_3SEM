@@ -1,0 +1,45 @@
+ //Filtrar todas as leituras de Fortaleza acima de 30°C.
+ db.dados_meteorologicos.find({
+  "cidade": "Fortaleza",
+  "temperatura": { $gt: 30 }
+}).pretty();
+
+ //Listar apenas nome e localização das estações.
+ db.estacoes_meteorologicas.find(
+  {},
+  {
+    "_id": 0,        
+    "nome": 1,         
+    "localizacao": 1   
+  }
+).pretty();
+
+ //Contar quantas leituras têm sensor “umidade”.
+ db.dados_meteorologicos.countDocuments({
+  "umidade": { $exists: true } 
+});
+ 
+ //Agrupar leituras por cidade e exibir média de temperatura.
+ db.dados_meteorologicos.aggregate([
+  {
+    $group: {
+      _id: "$cidade",
+      mediaTemperatura: { $avg: "$temperatura" }
+    }
+  }
+]).pretty();
+ 
+ //Ordenar as cidades pela maior temperatura média
+db.dados_meteorologicos.aggregate([
+  {
+    $group: {
+      _id: "$cidade", // 1. Agrupa pelo nome da cidade
+      mediaTemperatura: { $avg: "$temperatura" } // 2. Calcula a média de temperatura
+    }
+  },
+  {
+    $sort: {
+      mediaTemperatura: -1 // 3. Ordena pela média da temperatura. -1 para ordem decrescente (maior para menor).
+    }
+  }
+]).pretty();

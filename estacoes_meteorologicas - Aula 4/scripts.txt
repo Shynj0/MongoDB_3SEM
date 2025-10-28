@@ -1,0 +1,64 @@
+ //Inserir 5 novas estações meteorológicas com diferentes sensores.
+ 
+db.estacoes_meteorologicas.insertMany([
+  { "nome": "Estação Leste", "localizacao": "Belo Horizonte", "sensores": ["temperatura", "pressão", "chuva"] },
+  { "nome": "Estação Oeste", "localizacao": "Vitória", "sensores": ["umidade", "vento"] },
+  { "nome": "Estação Central", "localizacao": "Curitiba", "sensores": ["temperatura", "umidade", "pressão", "vento"] },
+  { "nome": "Estação Alpha", "localizacao": "Florianópolis", "sensores": ["radiação"] },
+  { "nome": "Estação Beta", "localizacao": "Recife", "sensores": ["temperatura", "chuva"] }
+]);
+ 
+ //Adicionar um novo campo "manutenção" com valor pendente a todas as estações.
+ 
+ db.estacoes_meteorologicas.updateMany(
+    {},
+    {$set:{"manutenção":"pendente"}}                                
+    );
+
+ //Atualizar a estação "Estação Sul" para adicionar um novo sensor "pressão".
+ 
+db.estacoes_meteorologicas.updateOne(
+  { "nome": "Estação Sul" },
+  { $push: { "sensores": "pressão" } } 
+);
+
+ //Atualizar a "Estação Norte" para remover o sensor "vento".
+
+ db.estacoes_meteorologicas.updateOne(
+  { "nome": "Estação Norte" },
+  { $pull: { "sensores": "vento" } } // $pull remove um elemento de um array
+);
+
+ //Remover todas as estações que não possuem sensores cadastrados.
+ db.estacoes_meteorologicas.deleteMany({
+  $or: [
+    { "sensores": { $exists: false } }, // Campo 'sensores' não existe
+    { "sensores": { $size: 0 } }        // Array 'sensores' está vazio
+  ]
+});
+
+ //Remover todas as estações que possuem menos de 3 sensores.
+ db.estacoes_meteorologicas.deleteMany({
+  $expr: { $lt: [{ $size: "$sensores" }, 3] }
+});
+
+ //Listar todas as estações que possuem o sensor "temperatura".
+ db.estacoes_meteorologicas.find({
+  "sensores": "temperatura"
+});
+
+ //Encontrar todas as estações que possuem o sensor "temperatura" E "pressão".
+ db.estacoes_meteorologicas.find({
+  "sensores": { $all: ["temperatura", "pressão"] }
+});
+
+ //Identificar todas as estações cujo campo localizacao seja do tipo string.
+ db.estacoes_meteorologicas.find({
+  "localizacao": { $type: "string" }
+});
+
+ //Aplicar paginação para listar 4 estações por vez, ignorando as 2 primeiras.
+db.estacoes_meteorologicas.find()
+  .skip(2)  // Ignora/pula as 2 primeiras estações
+  .limit(4) // Limita a 4 documentos na saída
+  .pretty(); // Formata a saída de forma legível 
